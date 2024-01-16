@@ -1,0 +1,36 @@
+eureka:
+  instance:
+    hostname: localhost
+server:
+  port: 9000
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+      - id: bugmng-module
+        uri: lb://bugmng-module
+        predicates:
+        - Path=/api/bugmng/**
+      
+      - id: admin-module
+        uri: lb://admin-module
+        predicates:
+        - Path=/admin/**
+        
+      - id: customer-module
+        uri: lb://customer-module
+        predicates:
+        - Path=/Customers/**
+        
+      - id: employee-module
+        uri: lb://employee-module
+        predicates:
+        - Path=/api/emp/**
+        
+      - id: projectmng-module
+        uri: lb://projectmng-module
+        predicates:
+        - Path=/admin/ctr/**
+        - Path=/proj/**

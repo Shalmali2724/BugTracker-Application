@@ -1,0 +1,5 @@
+# .gitignore
+.metadata/
+admin_module/target/
+customer_module/target/
+projectmng_module/target/

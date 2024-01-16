@@ -1,0 +1,163 @@
+package com.bugtracker.projectmngmodule.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.stereotype.Service;
+
+
+import com.bugtracker.projectmngmodule.dto.ProjectDto;
+import com.bugtracker.projectmngmodule.dto.ResponseVo;
+import com.bugtracker.projectmngmodule.dto.UpdateProjectDto;
+import com.bugtracker.projectmngmodule.entity.Admin;
+import com.bugtracker.projectmngmodule.entity.Employee;
+import com.bugtracker.projectmngmodule.entity.Project;
+import com.bugtracker.projectmngmodule.exception.AdminNotFound;
+import com.bugtracker.projectmngmodule.exception.ProjectNotFoundException;
+import com.bugtracker.projectmngmodule.repository.AdminRepository;
+import com.bugtracker.projectmngmodule.repository.EmployeeRepository;
+import com.bugtracker.projectmngmodule.repository.ProjectRepository;
+
+@Service
+public class ProjectServiceImpl implements ProjectService {
+
+	@Autowired
+	private ProjectRepository projectRepository;
+	@Autowired
+	private AdminRepository adminRepository;
+
+	@Autowired EmployeeRepository employeeRespository;
+	@Override
+	public ProjectDto addProject(ProjectDto projectDto) {
+
+		Project projectObj = new Project();
+		projectObj.setProjId(projectDto.getProjectId());
+		projectObj.setProjName(projectDto.getProjectName());
+		projectObj.setProjStatus(projectDto.getProjectStatus());
+
+		Optional<Admin> optionalAdmin = adminRepository.findById(projectDto.getAdminId());
+		if (optionalAdmin.isEmpty()) {
+
+			throw new AdminNotFound(" admin is not exists");
+
+		}
+
+		Admin admin = optionalAdmin.get();
+
+		Project newProject = projectRepository.save(projectObj);
+		// Create and return a ProjectDto object based on the saved project
+		ProjectDto newProjectDto = new ProjectDto();
+		newProjectDto.setProjectId(newProject.getProjId());
+		newProjectDto.setProjectName(newProject.getProjName());
+		newProjectDto.setProjectStatus(newProject.getProjStatus());
+
+		return newProjectDto;
+
+	}
+
+	@Override
+	public Project updateProjectById(UpdateProjectDto updateProject, long projectId) throws ProjectNotFoundException {
+		Optional<Project> optionalProject = projectRepository.findById(projectId);
+		if (optionalProject.isEmpty()) {
+			throw new ProjectNotFoundException("Project not existing with id:" + projectId);
+		}
+
+		Project project = optionalProject.get();
+		project.setProjId(projectId);
+		project.setProjName(updateProject.getProjectName());
+		project.setProjStatus(updateProject.getProjectStatus());
+		Project updatedProject = projectRepository.save(project);
+		return updatedProject;
+
+	}
+
+	@Override
+	public List<Project> getAllProject() {
+		List<Project> project = projectRepository.findAll();
+		if (project.isEmpty()) {
+			throw new ProjectNotFoundException("Project not exists yet!!");
+		}
+
+		return project;
+	}
+
+	@Override
+	public ResponseVo getProjectById(long projectId) {
+
+		Optional<Project> project = projectRepository.findById(projectId);
+		if (project.isEmpty()) {
+			throw new ProjectNotFoundException("project is not generated yet with  Id :" + projectId);
+		}
+		Project pro = project.get();
+		List<Employee> e = pro.getEmployee();
+		Project newProject = new Project();
+		newProject.setProjId(pro.getProjId());
+		newProject.setProjName(pro.getProjName());
+		newProject.setProjStatus(pro.getProjStatus());
+
+		ResponseVo obj = new ResponseVo();
+		obj.setEmployee(e);
+		obj.setProject(newProject);
+		return obj;
+	}
+	
+	
+	
+	public List<Project> getProjectByEmployeeId(long empId)
+	{
+		Optional<Employee> obj=employeeRespository.findById(empId);
+		if(obj.isEmpty())
+		{
+			throw new ProjectNotFoundException("You dont have any project right now  for  this employee !!"); 
+		}
+		Employee employee=obj.get();
+		
+		
+		List<Project> project=projectRepository.findByemployee(employee);
+		
+		
+		
+		
+		return project ;
+	}
+	
+	
+	
+	
+	
+	
+	
+
+}
+
+//@Override
+//public void createProject(ProjectDto projectDto) {
+//	Project project = new Project();
+//	project.setProjId(projectDto.getProjectId());
+//	project.setProjName(projectDto.getProjectName());;
+//	project.setProjStatus(projectDto.getProjectStatus());
+//	
+//	projectRepository.save(project);
+//	Optional<Admin> adminOptional = adminRepository.findById(projectDto.getAdminId());
+//	if(adminOptional.isEmpty()) {
+//		throw new AdminNotFound("Admin not found with this id: "+projectDto.getAdminId());
+//	}
+//	Admin admin = adminOptional.get();
+//
+//	projectRepository.save(project);
+//	
+//}
+
+//@Override
+//public Project getProjectById(long projectId) throws ProjectNotFoundException {
+//	Optional<Project> optionalProject = projectRepository.findById(projectId);
+//	if (optionalProject.isEmpty()) {
+//		throw new ProjectNotFoundException("Project not existing with id:" + projectId);
+//	}
+//	Project project = optionalProject.get();
+//
+//	return project;
+//	
+//}

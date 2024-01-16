@@ -1,0 +1,32 @@
+
+eureka:
+  instance:
+    hostname: localhost
+logging:
+  pattern:
+    file: '%d [%level] %c{1.} [%t] %m%n'
+    console: '%d [%level] %c{1.} [%t] %m%n'
+  level:
+    com:
+      adminservice: TRACE
+  file:
+    name: appLog.log
+server:
+  port: '9005'
+spring:
+  application:
+    name: bugmng-module
+  datasource:
+    password: admin
+    url: jdbc:postgresql://localhost:5432/bugtrackerdb?createDatabaseIfNotExist=true
+    username: postgres
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB

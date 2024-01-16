@@ -1,0 +1,113 @@
+package com.bugtracker.employeemodule.controller;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.bugtracker.employeemodule.entity.Project;
+import com.bugtracker.employeemodule.dto.AddEmployeeDto;
+import com.bugtracker.employeemodule.dto.BugUpdateDto;
+import com.bugtracker.employeemodule.entity.Employee;
+import com.bugtracker.employeemodule.exception.EmployeeNotFoundException;
+import com.bugtracker.employeemodule.service.EmployeeService;
+import com.bugtracker.employeemodule.util.LoggerUtil;
+
+@RestController
+@RequestMapping("/api/emp")
+public class EmployeeController extends Exception {
+
+	@Autowired
+	private EmployeeService employeeService;
+
+	// creating a list of Employee
+
+	@PostMapping("/employee/create")
+	public ResponseEntity<String> createEmployee(@RequestBody AddEmployeeDto employee) {
+
+		Employee createdEmployee = employeeService.createEmployee(employee);
+		return ResponseEntity.status(HttpStatus.OK).body("Employee database is created");
+
+	}
+
+	// Here we are getting list of all employees
+
+	@GetMapping("/employee/getall")
+	public List<Employee> getAllEmployees() {
+		List<Employee> employees = employeeService.getAllEmployees();
+		return employees;
+	}
+	// Here we are getting list of all employees by using Id
+
+	@GetMapping("/employee/{employeeid}")
+	public ResponseEntity<Object> getEmployeeById(@PathVariable("employeeid") long id)
+			throws EmployeeNotFoundException {
+		Optional<Employee> optional = employeeService.getEmployeeById(id);
+		if (!optional.isPresent())
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid ID given");
+
+		Employee employee = optional.get();
+		return ResponseEntity.status(HttpStatus.OK).body(employee);
+
+	}
+
+	// Here we are updating the the employee details
+
+	@PutMapping("/employee/update/{employeeId}")
+
+	public ResponseEntity<String> updateEmployeeById(@PathVariable("employeeId") long employeeId,
+			@RequestBody Employee employee) throws EmployeeNotFoundException {
+
+		employeeService.updateemployeeById(employee);
+		LoggerUtil.logInfo("Employee details are Updated");
+
+		return ResponseEntity.status(HttpStatus.OK).body("Employee is updated");
+
+	}
+
+	// Here we are deleting the the employee details
+	@DeleteMapping("/employee/delete/{employeeId}")
+
+	public ResponseEntity<String> deleteEmployeeById(@PathVariable("employeeId") long employeeId,
+			@RequestBody Employee employee) throws EmployeeNotFoundException {
+
+		employeeService.deleteEmployeeById(employee);
+		LoggerUtil.logInfo("Employee details by Id are Deleted");
+
+		return ResponseEntity.status(HttpStatus.OK).body("Employee is Deleted");
+
+	}
+
+	// Updating a bug status and End date in bug table ByBugId
+	@PutMapping("/employee/updatebugstatus/{bugId}")
+
+	public ResponseEntity<String> updateBugStatus(@PathVariable("bugId") long bugId,
+			@RequestBody BugUpdateDto bugupdatedto) {
+
+		employeeService.updateBugStatus(bugId, bugupdatedto);
+		LoggerUtil.logInfo("Bugs and End Date Status are Updated");
+
+		return ResponseEntity.status(HttpStatus.OK).body(" Bugs and End Date Status are Updated");
+
+	}
+
+	
+	@GetMapping("/getAllProject/ByEmployeeId/{empId}")
+	public List<Project> getAllProject(@PathVariable("empId") long empId) {
+		List<Project> proj = employeeService.getAllProjectByEmpId();
+
+		return proj;
+
+	}
+	
+}
